@@ -1,0 +1,6 @@
+[submodule "gerenciador-estoque"]
+	path = gerenciador-estoque
+	url = https://github.com/Matheus-AMoreira/gerenciador-estoque.git
+[submodule "api-previsoes"]
+	path = api-previsoes
+	url = https://github.com/Matheus-AMoreira/api-previsoes.git
