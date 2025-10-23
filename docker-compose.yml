@@ -2,7 +2,7 @@
 
     # Serviço de Banco de Dados PostgreSQL
     db:
-      container_name: ${PG_CONTAINER}
+      container_name: ${DB_CONTAINER}
       image: postgres:16-bullseye
       environment:
         POSTGRES_PASSWORD: ${PGADMIN_PASSWORD}
@@ -14,7 +14,7 @@
 
     # Serviço pgAdmin para gerenciar o PostgreSQL
     pgadmin:
-      container_name: pg-admin
+      container_name: pgadmin_container
       image: dpage/pgadmin4
       environment:
         PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
@@ -24,37 +24,34 @@
       depends_on:
         - db
 
-    # Serviço para a aplicação Node.js "gerenciador-estoque"
-    gerenciador-estoque:
-      container_name: gerenciador-estoque
-      build:
-        context: ./gerenciador-estoque
-        args: 
-          FRONTEND_REPO_URL: ${FRONTEND_REPO_URL}
-        dockerfile: dockerfile.frontend
-      environment:
-        PG_USER: ${PG_USER}
-        PG_HOST: ${PG_HOST}
-        PG_DATABASE: ${PG_DATABASE}
-        PG_PASSWORD: ${PG_PASSWORD}
-        PG_PORT: ${PG_PORT}
-        NEXT_PUBLIC_PY_BACKEND: http://localhost:${BACKEND_PORT}
-      ports:
-        - ${FRONTEND_PORT}:${FRONTEND_PORT}
-      depends_on:
-        - db
-
     # Serviço para a aplicação Python "API Previsoes"
-    api-previsoes:
-      container_name: api-previsoes
+    backend:
+      container_name: back_container
       build:
-        context: ./api-previsoes
-        args: 
-          BACKEND_REPO_URL: ${BACKEND_REPO_URL}
+        context: ./backend
         dockerfile: dockerfile.backend
       environment:
-        DATABASE_URL: postgresql://${PG_USER}:${PG_PASSWORD}@${PG_CONTAINER}:${PG_PORT}/${PG_DATABASE}
+        DATABASE_URL: ${DATABASE_URL}
       ports:
         - ${BACKEND_PORT}:${BACKEND_PORT}
       depends_on:
         - db
+
+    # Serviço para a aplicação Node.js "gerenciador-estoque"
+    frontend:
+      container_name: front_container
+      build:
+        context: ./Frontend
+        dockerfile: dockerfile.frontend
+      environment:
+        PG_USER: ${PG_USER}
+        PG_HOST: ${DB_CONTAINER}
+        PG_DATABASE: ${PG_DATABASE}
+        PG_PASSWORD: ${PG_PASSWORD}
+        PG_PORT: ${PG_PORT}
+        NEXT_PUBLIC_PY_BACKEND: ${NEXT_PUBLIC_PY_BACKEND}
+      ports:
+        - ${FRONTEND_PORT}:${FRONTEND_PORT}
+      depends_on:
+        - db
+        - backend
