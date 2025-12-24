@@ -1,0 +1,39 @@
+services:
+  database:
+    container_name: postgres_database
+    image: postgres:16-bullseye
+    environment:
+      POSTGRES_PASSWORD: oauidf9324-pzokfad0rf-q2ndsfgsx
+      POSTGRES_DB: projecao
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data:Z
+    ports:
+      - 5432:5432
+
+  backend:
+    container_name: fastapi_backend
+    build:
+      context: ./backend
+      dockerfile: backend.yml
+    restart: always
+    environment:
+      DATABASE_URL: postgresql://postgres:oauidf9324-pzokfad0rf-q2ndsfgsx@postgres_database:5432/projecao
+      PORT_BACKEND: 8000
+    ports:
+      - 8000:8000
+    depends_on:
+      - database
+
+  frontend:
+    container_name: react_frontend
+    build:
+      context: ./frontend
+      dockerfile: frontend.yml
+    environment:
+      VITE_API_URL: http://localhost:8000/api
+      VITE_PORT: 3000
+    ports:
+      - 3000:3000
+    depends_on:
+      - database
+      - backend
