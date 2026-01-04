@@ -35,6 +35,7 @@ def trigger_update(
         )
         .filter(filter_col == key_value)
         .group_by("ano", "mes")
+        .order_by("ano", "mes")
         .all()
     )
 
@@ -56,10 +57,14 @@ def list_predictions(
     name: Optional[str] = None,
     db: Session = Depends(get_db),
 ):
+    # Se nenhum filtro for passado, retornamos vazio ou erro para evitar mistura
+    if not category and not name:
+        return []
+
     query = db.query(Prediction)
     if category:
         query = query.filter(Prediction.categoria == category)
-    if name:
+    elif name:  # Usar elif para garantir que não filtre por ambos simultaneamente se não desejar
         query = query.filter(Prediction.name == name)
 
     return query.order_by(Prediction.ano, Prediction.mes).all()

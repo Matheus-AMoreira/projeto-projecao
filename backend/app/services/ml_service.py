@@ -31,21 +31,39 @@ class MLService:
         return X_scaled, y_scaled
 
     def train_and_predict(self, db, df: pd.DataFrame, key_type: str, key_value: str):
-        if len(df) < (self.lag_features + 1):
+        # 1. Validação mínima de dados
+        num_registros = len(df)
+        if num_registros < (self.lag_features + 1):
             raise ValueError(
                 f"Dados insuficientes (mínimo {self.lag_features + 1} meses)."
             )
 
-        # 1. Preparação e Treino
+        # 2. Definição dinâmica do horizonte de previsão
+        # Regra: 2 meses -> 1 mês de previsão; até 1 ano (12 meses) -> 6 meses (máximo)
+        if num_registros <= 2:
+            meses_a_prever = 1
+        else:
+            # Proporção aproximada ou teto de 6 meses
+            meses_a_prever = min(6, num_registros // 2)
+            # Garante pelo menos 1 mês se tiver dados suficientes para o lag
+            meses_a_prever = max(1, meses_a_prever)
+
+        # 3. Preparação e Treino
         X, y = self._prepare_data(df.copy())
         self.model.fit(X, y)
 
-        # 2. Predição Iterativa (Próximos 6 meses)
+        # 4. Identificar a data do último registro para começar a partir do mês seguinte
+        # Assume-se que o df tem as colunas 'ano' e 'mes' vindas da query
+        ultimo_registro = df.iloc[-1]
+        data_base = datetime(
+            int(ultimo_registro["ano"]), int(ultimo_registro["mes"]), 1
+        )
+
+        # 5. Predição Iterativa
         predictions = []
         last_data = df.tail(self.lag_features)["quantidade"].values.tolist()
-        current_date = datetime.now()
 
-        for i in range(6):
+        for i in range(meses_a_prever):
             input_lags = np.array(last_data[-self.lag_features :]).reshape(1, -1)
             input_scaled = self.scaler_X.transform(input_lags)
 
@@ -55,7 +73,8 @@ class MLService:
             ]
             pred_final = max(0, int(round(pred_final)))
 
-            forecast_date = current_date + relativedelta(months=i + 1)
+            # Data é sempre o mês seguinte ao registro anterior
+            forecast_date = data_base + relativedelta(months=i + 1)
 
             pred_entry = {
                 "ano": forecast_date.year,
@@ -67,7 +86,7 @@ class MLService:
             predictions.append(pred_entry)
             last_data.append(pred_final)
 
-        # 3. Persistência no Banco (Responsabilidade do Serviço)
+        # 6. Persistência
         self._save_to_db(db, predictions, key_type, key_value)
         return predictions
 

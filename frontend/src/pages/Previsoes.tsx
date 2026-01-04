@@ -65,21 +65,46 @@ export default function Previsoes() {
     }
   }, [selectedValue, selectedType]);
 
+  useEffect(() => {
+    fetchCurrentData(selectedType, selectedValue);
+  }, [selectedValue, selectedType]);
+
+  const fetchCurrentData = async (type: string, value: string) => {
+    if (!value) return;
+    try {
+      // Busca Previsões (IA)
+      const predRes = await api.get(`/predictions/?${type}=${value}`);
+      // Como o backend retorna uma lista de objetos Prediction,
+      // ajustamos para pegar os dados corretamente conforme seu modelo
+      setPredictions(predRes.data || []);
+
+      // Busca Histórico (Real)
+      const histRes = await api.get(`/items/stats?${type}=${value}`);
+      setHistoricalData(histRes.data.dados || []);
+    } catch (err) {
+      setPredictions([]);
+      setHistoricalData([]);
+    }
+  };
+
   const handleGenerate = async (data: any) => {
     try {
+      // Trigger no backend para rodar o ML
       await api.post("/predictions/update", { [data.type]: data.value });
+
       setModal({
         open: true,
-        message: "IA processada. Dados atualizados!",
+        message: `Projeções para ${data.value} atualizadas com sucesso!`,
         type: "success",
       });
-      // Recarrega as previsões após gerar
-      const res = await api.get(`/predictions/?${data.type}=${data.value}`);
-      setPredictions(res.data[0]?.dados || []);
+
+      // Atualiza apenas os dados da lista sem recarregar a página inteira
+      await fetchCurrentData(data.type, data.value);
     } catch (error) {
       setModal({
         open: true,
-        message: "Erro ao gerar previsões.",
+        message:
+          "Erro ao gerar previsões. Verifique se há dados históricos suficientes.",
         type: "error",
       });
     }
