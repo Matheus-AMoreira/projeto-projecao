@@ -121,6 +121,17 @@ export default function ProductForm({
         )}
       </div>
 
+      <div className="md:col-span-2">
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Data de Compra (Opicional)
+        </label>
+        <input
+          type="date"
+          {...register("created_at")}
+          className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
       <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-gray-100">
         <button
           type="button"

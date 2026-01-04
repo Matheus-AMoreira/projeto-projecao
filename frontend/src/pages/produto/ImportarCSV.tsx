@@ -97,7 +97,7 @@ export default function ImportarCSV() {
         message={modal.message}
         type={modal.type}
         onClose={() => setModal({ ...modal, open: false })}
-        redirectPath="/"
+        redirectPath="/produto"
       />
     </div>
   );

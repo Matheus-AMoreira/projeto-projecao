@@ -92,6 +92,10 @@ async def upload_csv(file: UploadFile = File(...), db: Session = Depends(get_db)
                 if not row.get("expiration_date"):
                     row["expiration_date"] = None
 
+                # Verefica se a data de criação está vazia
+                if not row.get("created_at"):
+                    row["created_at"] = None
+
                 # Validação via Pydantic Schema (Garante a lógica de negócio)
                 product_data = ProductCreate(**row)
 

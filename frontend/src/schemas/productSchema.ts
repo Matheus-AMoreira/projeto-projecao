@@ -10,6 +10,7 @@ export const productSchema = z.object({
   purchase_price: z.coerce.number().min(0.01, "Preço inválido"),
   purchase_currency: z.string().default("BRL"),
   expiration_date: z.string().optional(),
+  created_at: z.string().optional(),
   sale_price: z.coerce.number().optional(),
 });
 

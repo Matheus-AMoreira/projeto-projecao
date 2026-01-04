@@ -14,6 +14,7 @@ class ProductBase(BaseModel):
     purchase_currency: str
     sale_price: Optional[Decimal] = None
     sale_currency: Optional[str] = None
+    created_at: Optional[datetime] = None
 
 
 class ProductCreate(ProductBase):
