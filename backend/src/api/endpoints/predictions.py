@@ -5,10 +5,10 @@ from fastapi import APIRouter, Body, Depends, HTTPException
 from sqlalchemy import extract, func
 from sqlalchemy.orm import Session
 
-from app.db.session import get_db
-from app.models.prediction import Prediction
-from app.models.product import Product
-from app.services.ml_service import ml_service
+from src.db.session import get_db
+from src.models.prediction import Prediction
+from src.models.product import Product
+from src.services.ml_service import ml_service
 
 router = APIRouter()
 

@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy import Column, Date, DateTime, Integer, Numeric, String
 
-from app.db.session import Base
+from src.db.session import Base
 
 
 class Product(Base):

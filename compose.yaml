@@ -14,7 +14,7 @@ services:
     container_name: fastapi_backend
     build:
       context: ./backend
-      dockerfile: backend.yml
+      dockerfile: backend/DockerFile
     restart: always
     environment:
       DATABASE_URL: postgresql://postgres:oauidf9324-pzokfad0rf-q2ndsfgsx@postgres_database:5432/projecao

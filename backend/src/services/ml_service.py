@@ -6,7 +6,7 @@ from dateutil.relativedelta import relativedelta
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 
-from app.models.prediction import Prediction
+from src.models.prediction import Prediction
 
 
 class MLService:

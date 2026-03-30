@@ -7,17 +7,15 @@ from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, 
 from sqlalchemy import desc, distinct, extract, func
 from sqlalchemy.orm import Session
 
-from app.db.session import get_db
-from app.models.product import Product
-from app.schemas.product import (
+from src.db.session import get_db
+from src.models.product import Product
+from src.schemas.product import (
     ProductCreate,
     ProductResponse,
     ProductUpdate,
 )
 
 router = APIRouter()
-
-# --- Rotas de Consulta e Histórico ---
 
 
 @router.get("/", response_model=List[ProductResponse])
@@ -36,14 +34,13 @@ def get_products_stats(
     if not category and not name:
         raise HTTPException(status_code=400, detail="Especifique category ou name")
 
-    query_filter = Product.category == category if category else Product.name == name
     resultados = (
         db.query(
             extract("year", Product.created_at).label("ano"),
             extract("month", Product.created_at).label("mes"),
             func.sum(Product.quantity).label("total_quantidade"),
         )
-        .filter(query_filter)
+        .filter(Product.category == category if category else Product.name == name)
         .group_by("ano", "mes")
         .order_by("ano", "mes")
         .all()
@@ -119,9 +116,6 @@ async def upload_csv(file: UploadFile = File(...), db: Session = Depends(get_db)
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Erro ao processar CSV: {str(e)}")
-
-
-# --- Operações CRUD (Para suportar o Frontend) ---
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)

@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy import Column, DateTime, Integer, String
 
-from app.db.session import Base
+from src.db.session import Base
 
 
 class Prediction(Base):

@@ -1,7 +1,10 @@
+[tool.fastapi]
+entrypoint = "src.main:app"
+
 [project]
 name = "backend"
 version = "0.1.0"
-description = "Add your description here"
+description = "Projeto de projecão de vendas"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
